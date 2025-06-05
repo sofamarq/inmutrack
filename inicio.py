@@ -11,7 +11,7 @@ from registro_usuario import mostrar_registro_usuario
 from registro_centro import mostrar_registro_centro
 from funciones_supabase import buscar_usuario_por_dni, buscar_centro_por_id
 
-st.set_page_config(page_title="INMUTRACK")
+st.set_page_config(page_title="INMUTRACK", page_icon="💉")
 
 # Inicializar el estado si no existe
 if "pagina_actual" not in st.session_state:
