@@ -50,7 +50,9 @@ def mostrar_vacunas_pendientes():
 
     usuario, historial = obtener_datos_usuario_y_historial(dni)
     vacunas = transformar_vacunas_dataframe()
-
+    # Filtramos para eliminar duplicados por nombre de vacuna
+    vacunas = vacunas.drop_duplicates(subset=["nombre_vacuna"])
+    
     edad_hoy = (datetime.today() - datetime.strptime(usuario["fecha_nacimiento"], "%Y-%m-%d")).days // 30  # en meses
     edad_proximo_anio = edad_hoy + 12
 
