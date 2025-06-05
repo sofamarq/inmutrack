@@ -103,101 +103,14 @@ def mostrar_vista_usuario():
                     st.warning(f"🔔 Tenés {len(set(pendientes_inicio))} vacunas pendientes por aplicar")
                 else:
                     st.success("✔️ No tenés vacunas pendientes.")
-                        with col2:
-                            st.subheader("📋 Dosis aplicadas")
-                            st.success(f"{cantidad_dosis} dosis registradas")
-#---------
-       # else:
-           # with col1:
-               # st.subheader("💉 Próxima vacuna")
-               # st.warning("No se pudo obtener la información.")
-           # with col2:
-               # st.subheader("📋 Dosis aplicadas")
-               # st.warning("No se pudo obtener el historial.")
-#------------- esta seccion que viene abajo corre, pero se ve vacio.        
-                # aplicadas = {
-                #     r[0]["nombre_vacuna"]
-                #     for r in historial
-                #     if isinstance(r, tuple) and len(r) > 0 and isinstance(r[0], dict) and "nombre_vacuna" in r[0]
-                # }
+            with col2:
+                st.subheader("📋 Dosis aplicadas")
+                st.success(f"{cantidad_dosis} dosis registradas")
 
-                # # Pendientes
-                # pendientes_inicio = []
-                # for _, row in vacunas_df.iterrows():
-                #     if (
-                #         row["edad_1ra_dosis"] is not None
-                #         and row["edad_1ra_dosis"] <= edad_actual_meses
-                #         and row["nombre_vacuna"] not in aplicadas
-                #     ):
-                #         pendientes_inicio.append(row["nombre_vacuna"])
-
-                # # Próximas vacunas
-                # proximas = []
-                # for _, row in vacunas_df.iterrows():
-                #     if (
-                #         row["nombre_vacuna"] not in aplicadas
-                #         and row["edad_1ra_dosis"] is not None
-                #         and row["edad_1ra_dosis"] > edad_actual_meses
-                #     ):
-                #         proximas.append((row["nombre_vacuna"], row["edad_1ra_dosis"]))
-                #     elif (
-                #         row["refuerzo"] is not None
-                #         and row["edad_1ra_dosis"] is not None
-                #         and (row["edad_1ra_dosis"] + row["refuerzo"]) > edad_actual_meses
-                #         and row["nombre_vacuna"] in aplicadas
-                #     ):
-                #         proximas.append((row["nombre_vacuna"], row["edad_1ra_dosis"] + row["refuerzo"]))
-
-                # # Mostrar info en columnas
-                # col1, col2 = st.columns(2)
-                # with col1:
-                #     st.subheader("💉 Próxima vacuna")
-                #     if proximas:
-                #         vacuna_proxima = sorted(proximas, key=lambda x: x[1])[0]
-                #         meses_faltan = vacuna_proxima[1] - edad_actual_meses
-                #         fecha_aprox = datetime.today().date() + pd.DateOffset(months=meses_faltan)
-                #         st.info(f"{vacuna_proxima[0]} - {fecha_aprox.strftime('%d/%m/%Y')}")
-                #     else:
-                #         st.success("No hay vacunas próximas registradas")
-
-                #     # Mostrar aviso si hay pendientes
-                #     if pendientes_inicio:
-                #         st.warning(f"🔔 Tenés {len(pendientes_inicio)} vacunas pendientes por aplicar.")
-                #     else:
-                #         st.success("✔️ No tenés vacunas pendientes.")
-
-                # with col2:
-                #     st.subheader("📋 Dosis aplicadas")
-                #     st.success(f"{cantidad_dosis} dosis registradas")
-#-------
-        
-        # col1, col2 = st.columns(2)
-        # with col1:
-        #     st.subheader("💉 Próxima vacuna")
-        #     st.info("Triple Viral - 12/05/2025")
-        # with col2:
-        #     st.subheader("📋 Dosis aplicadas")
-        #     st.success("7 dosis registradas")
-
-        # st.markdown("---")
-        # st.markdown("""
-        # - 📇 **Mis datos**: revisá y actualizá tu información personal  
-        # - 📋 **Historial**: consultá qué vacunas te fueron aplicadas  
-        # - 🧾 **Pendientes**: enterate qué dosis te falta completar  
-        # """)
-#-----------
 
     elif opcion == "Mis datos":
         st.header("📇 Mis datos personales")
 
-# --- Datos simulados (más adelante se obtendrán de Supabase) ---
-        # datos_usuario = {
-        #     "Nombre": "Ana",
-        #     "Apellido": "Pérez",
-        #     "DNI": "12345678",
-        #     "Fecha de nacimiento": "2000-01-01"
-        #  }
-#----
         usuario = st.session_state.get("usuario_actual", {})
         st.session_state["dni"] = usuario.get("user_id", "")
 
@@ -215,22 +128,14 @@ def mostrar_vista_usuario():
 
     # --- Datos editables ---
         with st.form("form_mis_datos"):
-            # localidad = st.text_input("Localidad", value="CABA")
-            # telefono = st.text_input("Teléfono de contacto", value="1122334455")
-            # email = st.text_input("Correo electrónico", value="ana@email.com")
-            # personal_salud = st.checkbox("¿Es personal de salud?", value=True)
-            # embarazada = st.checkbox("¿Está embarazada?", value=False)
             
+        
             localidad = st.text_input("Localidad", value=usuario.get("localidad", ""))
             telefono = st.text_input("Teléfono de contacto", value=usuario.get("telefono_contacto", ""))
             email = st.text_input("Correo electrónico", value=usuario.get("correo_electronico", ""))
             personal_salud = st.checkbox("¿Es personal de salud?", value=usuario.get("personal_salud", False))
             embarazada = st.checkbox("¿Está embarazada?", value=usuario.get("embarazada", False))
-
-            # if st.form_submit_button("Guardar cambios"):
-            #     # T.ODO: Actualizar en Supabase
-            #     st.success("✅ Cambios guardados correctamente.")
-            
+  
             if st.form_submit_button("Guardar cambios"):
                 cambios = {
                     "user_id": usuario.get("user_id"),
