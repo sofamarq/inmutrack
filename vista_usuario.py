@@ -61,42 +61,33 @@ def mostrar_vista_usuario():
             # Obtener historial y vacunas
             historial = obtener_historial_vacunacion_usuario(dni)
             vacunas_df = transformar_vacunas_dataframe()
+            vacunas_df = vacunas_df.drop_duplicates(subset=["nombre_vacuna"])
             
             if isinstance(historial, dict) and "data" in historial:
                 historial = historial["data"]
-
-#-----------------  Este pedazo de aca corre. Estaba intentando que aparezca algo abajo como "revisar pendientes"          
-            aplicadas = {r["vacuna"] for r in historial if "vacuna" in r}
-
             
-            # Verificar si hay pendientes
+            # Set de vacunas ya aplicadas
+            aplicadas = {r["vacuna"] for r in historial if "vacuna" in r}
+            
+            # Inicializo listas
             pendientes_inicio = []
+            proximas = []
+            
             for _, row in vacunas_df.iterrows():
-                if (
-                    row["edad_1ra_dosis"] is not None
-                    and row["edad_1ra_dosis"] <= edad_actual_meses
-                    and row["nombre_vacuna"] not in aplicadas
-                ):
+                if row["edad_1ra_dosis"] is None:
+                    continue
+            
+                if row["edad_1ra_dosis"] <= edad_actual_meses and row["nombre_vacuna"] not in aplicadas:
                     pendientes_inicio.append(row["nombre_vacuna"])
-
-#------           
-            # Vacunas ya aplicadas
-            #aplicadas = {r["vacunas"]["nombre_vacuna"] for r in historial if r.get("vacunas")}
-            # aplicadas = {
-            #     r[0]["nombre_vacuna"]
-            #     for r in historial
-            #         if isinstance(r, tuple) and len(r) > 0 and isinstance(r[0], dict) and "nombre_vacuna" in r[0]
-            # }
-
-            # Buscar próxima vacuna
-            #proximas = []
-#----
-            for _, row in vacunas_df.iterrows():
-                if row["nombre_vacuna"] not in aplicadas and row["edad_1ra_dosis"] is not None and row["edad_1ra_dosis"] > edad_actual_meses:
-                    proximas.append((row["nombre_vacuna"], row["edad_1ra_dosis"]))
-                elif row["refuerzo"] is not None and (row["edad_1ra_dosis"] + row["refuerzo"]) > edad_actual_meses:
-                    proximas.append((row["nombre_vacuna"], row["edad_1ra_dosis"] + row["refuerzo"]))
-    
+                elif row["nombre_vacuna"] not in aplicadas:
+                    # Calculamos próximas dosis futuras
+                    if row["edad_1ra_dosis"] > edad_actual_meses:
+                        proximas.append((row["nombre_vacuna"], row["edad_1ra_dosis"]))
+                    elif row["refuerzo"] is not None and (row["edad_1ra_dosis"] + row["refuerzo"]) > edad_actual_meses:
+                        proximas.append((row["nombre_vacuna"], row["edad_1ra_dosis"] + row["refuerzo"]))
+            
+            # Visualización
+            
             col1, col2 = st.columns(2)
             with col1:
                 st.subheader("💉 Próxima vacuna")
@@ -107,16 +98,14 @@ def mostrar_vista_usuario():
                     st.info(f"{vacuna_proxima[0]} - {fecha_aprox.strftime('%d/%m/%Y')}")
                 else:
                     st.success("No hay vacunas próximas registradas")
-
+            
                 if pendientes_inicio:
-                        st.warning(f"🔔 Tenés {len(pendientes_inicio)} vacunas pendientes por aplicar")
+                    st.warning(f"🔔 Tenés {len(set(pendientes_inicio))} vacunas pendientes por aplicar")
                 else:
                     st.success("✔️ No tenés vacunas pendientes.")
-                
-
-            with col2:
-                st.subheader("📋 Dosis aplicadas")
-                st.success(f"{cantidad_dosis} dosis registradas")
+                        with col2:
+                            st.subheader("📋 Dosis aplicadas")
+                            st.success(f"{cantidad_dosis} dosis registradas")
 #---------
        # else:
            # with col1:
