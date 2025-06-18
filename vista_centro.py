@@ -56,15 +56,15 @@ def mostrar_vista_centro():
 
         with col1:
             st.subheader("📅 Aplicaciones hoy")
-            if aplicaciones_hoy and aplicaciones_hoy.data:
-                st.info(f"{len(aplicaciones_hoy.data)} registradas")
+            if aplicaciones_hoy:
+                st.info(f"{len(aplicaciones_hoy)} registradas")
             else:
                 st.info("0 registradas")
 
         with col2:
             st.subheader("🧑‍⚕️ Aplicaciones este mes")
-            if aplicaciones_mes and aplicaciones_mes.data:
-                st.success(f"{len(aplicaciones_mes.data)} dosis aplicadas")
+            if aplicaciones_mes:
+                st.success(f"{len(aplicaciones_mes)} dosis aplicadas")
             else:
                 st.success("0 dosis aplicadas")
 #----
