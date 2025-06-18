@@ -26,7 +26,7 @@ def mostrar_historial_diario():
         st.text(resultado["error"]["message"])
         return
 
-    registros = resultado.data
+    registros = obtener_aplicaciones_por_fecha(fecha_str, id_centro)
 
     if not registros:
         st.info(f"No hay aplicaciones registradas el {fecha_str}.")
@@ -35,9 +35,9 @@ def mostrar_historial_diario():
     # Convertir datos a DataFrame
     df = pd.DataFrame([
         {
-            "ID vacuna": r.get("id_vacuna"),
-            "Vacuna": r.get("vacunas", {}).get("nombre_vacuna", ""),
-            "Laboratorio": r.get("vacunas", {}).get("laboratorio", "")
+            "ID vacuna": r["id_vacuna"],
+            "Vacuna": r["nombre_vacuna"],
+            "Laboratorio": r["laboratorio"]
         } for r in registros
     ])
 
