@@ -41,7 +41,7 @@ def mostrar_vista_usuario():
         vacunas_df = transformar_vacunas_dataframe()
         proximas = []
 
-        if historial_response and historial_response.data:
+        if historial_response:
             historial = historial_response.data
             cantidad_dosis = len(historial)
 
