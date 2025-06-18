@@ -11,21 +11,18 @@ def mostrar_historial_usuario():
         st.warning("No se encontró DNI en sesión.")
         return
 
-    resultado = obtener_historial_vacunacion_usuario(int(dni))
+    registros = obtener_historial_vacunacion_usuario(int(dni))
 
-    if not resultado or resultado.data is None or len(resultado.data) == 0:
+    if not registros or len(registros) == 0:
         st.info("No se encontraron registros de vacunación.")
         return
 
-    registros = resultado.data
-
     df = pd.DataFrame([
         {
-            "Vacuna": r["vacunas"]["nombre_vacuna"] if r.get("vacunas") else "",
-            "Laboratorio": r["vacunas"]["laboratorio"] if r.get("vacunas") else "",
-            "Enfermedad": r["vacunas"]["enfermedad_que_previene"] if r.get("vacunas") else "",
-            "Fecha": r["fecha_aplicacion"],
-            #"Dosis": r.get("dosis", "")
+            "Vacuna": r.get("vacuna", ""),
+            "Laboratorio": r.get("laboratorio", ""),
+            "Enfermedad": r.get("enfermedad", ""),
+            "Fecha": r.get("fecha", "")
         }
         for r in registros
     ])
@@ -41,4 +38,4 @@ def mostrar_historial_usuario():
     if st.toggle("Ordenar por fecha más reciente primero"):
         df = df.sort_values("Fecha", ascending=False)
 
-    st.dataframe(df[["Vacuna", "Laboratorio", "Enfermedad", "Fecha"]], use_container_width=True) #agregar "Dosis"
+    st.dataframe(df[["Vacuna", "Laboratorio", "Enfermedad", "Fecha"]], use_container_width=True)
