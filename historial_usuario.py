@@ -30,6 +30,8 @@ def mostrar_historial_usuario():
     df.index = df.index + 1
     df["Fecha"] = pd.to_datetime(df["Fecha"])
     df = df.sort_values("Fecha", ascending=True)
+    df["Fecha"] = df["Fecha"].dt.strftime("%Y-%m-%d")
+
 
     filtro_enfermedad = st.selectbox("Filtrar por enfermedad", options=["Todas"] + sorted(df["Enfermedad"].unique().tolist()))
     if filtro_enfermedad != "Todas":
