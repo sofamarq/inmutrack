@@ -147,43 +147,91 @@ def obtener_historial_vacunacion_usuario(dni: int):
     return historial
 
 def obtener_aplicaciones_por_fecha(fecha: str, id_centro: int):
-    #return supabase.table("aplicaciones").select("*").eq("fecha", fecha).execute()
-    return supabase.table("registro").select("""
-        id_vacuna,
-        fecha_aplicacion,
-        numero_lote,
-        vacunas(nombre_vacuna, laboratorio)
-    """).eq("fecha_aplicacion", fecha).eq("id_centro", id_centro).execute()
+    # 1. Obtener registros sin join
+    aplicaciones_response = supabase.table("registro").select("*").eq("fecha_aplicacion", fecha).eq("id_centro", id_centro).execute()
+
+    # 2. Obtener vacunas para armar el mapa
+    vacunas_response = supabase.table("vacunas").select("id_vacuna, nombre_vacuna, laboratorio").execute()
+    mapa_vacunas = {v["id_vacuna"]: v for v in vacunas_response.data}
+
+    # 3. Enriquecer los datos
+    registros_enriquecidos = []
+    for r in aplicaciones_response.data:
+        vacuna = mapa_vacunas.get(r["id_vacuna"], {})
+        registros_enriquecidos.append({
+            "id_vacuna": r.get("id_vacuna"),
+            "nombre_vacuna": vacuna.get("nombre_vacuna", ""),
+            "laboratorio": vacuna.get("laboratorio", ""),
+            "numero_lote": r.get("numero_lote", ""),
+            "fecha_aplicacion": r.get("fecha_aplicacion", "")
+        })
+
+    return registros_enriquecidos
 
 
 def obtener_aplicaciones_por_mes(anio: int, mes: int, id_centro: int):
-    mes_str = f"{anio}-{mes:02d}"
+    from datetime import date
+
     fecha_inicio = date(anio, mes, 1)
     if mes == 12:
         fecha_fin = date(anio + 1, 1, 1)
     else:
         fecha_fin = date(anio, mes + 1, 1)
 
-    return supabase.table("registro").select("""
-        id_vacuna,
-        fecha_aplicacion,
-        vacuna:vacunas (
-            nombre_vacuna,
-            laboratorio
-        )
-    """).gte("fecha_aplicacion", fecha_inicio.isoformat()) \
-      .lt("fecha_aplicacion", fecha_fin.isoformat()) \
-      .eq("id_centro", id_centro).execute()
+    # 1. Obtener aplicaciones
+    aplicaciones_response = supabase.table("registro").select("*") \
+        .gte("fecha_aplicacion", fecha_inicio.isoformat()) \
+        .lt("fecha_aplicacion", fecha_fin.isoformat()) \
+        .eq("id_centro", id_centro).execute()
+
+    # 2. Obtener vacunas
+    vacunas_response = supabase.table("vacunas").select("id_vacuna, nombre_vacuna, laboratorio").execute()
+    mapa_vacunas = {v["id_vacuna"]: v for v in vacunas_response.data}
+
+    # 3. Enriquecer datos
+    registros = []
+    for r in aplicaciones_response.data:
+        vacuna = mapa_vacunas.get(r["id_vacuna"], {})
+        registros.append({
+            "id_vacuna": r.get("id_vacuna"),
+            "nombre_vacuna": vacuna.get("nombre_vacuna", ""),
+            "laboratorio": vacuna.get("laboratorio", ""),
+            "fecha_aplicacion": r.get("fecha_aplicacion", ""),
+            "numero_lote": r.get("numero_lote", "")
+        })
+
+    return registros
     
    
 #def obtener_aplicaciones_por_anio(anio):
     #return supabase.table("aplicaciones").select("*").like("fecha", f"{anio}-%").execute()
 
-def obtener_aplicaciones_anuales(anio, id_centro):
+def obtener_aplicaciones_anuales(anio: int, id_centro: int):
+    from datetime import date
+
     fecha_inicio = date(anio, 1, 1)
     fecha_fin = date(anio, 12, 31)
-    return supabase.table("registro").select("""
-        fecha_aplicacion,
-        vacunas(nombre_vacuna, laboratorio)
-    """).gte("fecha_aplicacion", fecha_inicio).lte("fecha_aplicacion", fecha_fin).eq("id_centro", id_centro).execute()
 
+    # 1. Obtener registros de todo el año
+    aplicaciones_response = supabase.table("registro").select("*") \
+        .gte("fecha_aplicacion", fecha_inicio.isoformat()) \
+        .lte("fecha_aplicacion", fecha_fin.isoformat()) \
+        .eq("id_centro", id_centro).execute()
+
+    # 2. Obtener vacunas
+    vacunas_response = supabase.table("vacunas").select("id_vacuna, nombre_vacuna, laboratorio").execute()
+    mapa_vacunas = {v["id_vacuna"]: v for v in vacunas_response.data}
+
+    # 3. Unir datos
+    registros = []
+    for r in aplicaciones_response.data:
+        vacuna = mapa_vacunas.get(r["id_vacuna"], {})
+        registros.append({
+            "id_vacuna": r.get("id_vacuna"),
+            "nombre_vacuna": vacuna.get("nombre_vacuna", ""),
+            "laboratorio": vacuna.get("laboratorio", ""),
+            "fecha_aplicacion": r.get("fecha_aplicacion", ""),
+            "numero_lote": r.get("numero_lote", "")
+        })
+
+    return registros
