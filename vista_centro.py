@@ -8,7 +8,6 @@ import base64
 from io import BytesIO
 from funciones_supabase import actualizar_responsable_centro, obtener_aplicaciones_por_fecha, obtener_aplicaciones_por_mes
 
-#st.session_state["id_centro"] = centro["id_centro"]
 
 def mostrar_vista_centro():
     with st.sidebar:
@@ -43,14 +42,6 @@ def mostrar_vista_centro():
         st.header(f"👋 ¡Bienvenido, {st.session_state.nombre_centro}!")
         st.markdown("Gracias por formar parte de Inmutrack. Desde este panel podrás gestionar el proceso de vacunación en tu centro:")
 
-        # col1, col2 = st.columns(2)
-        # with col1:
-        #     st.subheader("📅 Aplicaciones hoy")
-        #     st.info("15 registradas")
-        # with col2:
-        #     st.subheader("🧑‍⚕️ Aplicaciones este mes")
-        #     st.success("87 dosis aplicadas")
-
         from datetime import date
 
         id_centro = st.session_state.get("id_centro", None)
@@ -81,7 +72,8 @@ def mostrar_vista_centro():
         st.markdown("""
         - 💉 **Registrar vacuna**: ingresá nuevas aplicaciones  
         - 📆 **Historial diario**: revisá las aplicaciones de hoy  
-        - 🗓️ **Historial mensual**: visualizá todas las del mes  
+        - 🗓️ **Historial mensual**: visualizá todas las del mes 
+        - 📊 **Análisis anual**: obtené las aplicaciones de todo el año 
         """)
 
     elif opcion == "Datos de la institución":
@@ -96,14 +88,7 @@ def mostrar_vista_centro():
             "Teléfono de contacto": centro.get("telefono", ""),
             "Correo Electrónico": centro.get("correo_electronico", "")
         }
-        # datos_centro = {
-        #     "Nombre": "Centro de Salud Nº1",
-        #     "Dirección": "Av. San Martín 1234",
-        #     "Localidad": "Buenos Aires",
-        #     "Teléfono de contacto": "011-4321-1234",
-        #     "Correo Electrónico": "centro@inmutrack.com"
-        #  }
-
+        
         for campo, valor in datos_centro.items():
             st.markdown(f"**{campo}:** {valor}")
 
@@ -112,10 +97,7 @@ def mostrar_vista_centro():
         with st.form("form_responsable"):
             #responsable = st.text_input("Responsable médico a cargo", value="Dra. Ana Pérez")
             responsable = st.text_input("Responsable médico a cargo", value=centro.get("medico_responsable", ""))
-
-            # if st.form_submit_button("Guardar cambios"):
-            #     st.success("✅ Cambios guardados correctamente.")
-
+            
             if st.form_submit_button("Guardar cambios"):
                 resultado = actualizar_responsable_centro(centro.get("id_centro"), responsable)
 
