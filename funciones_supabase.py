@@ -83,22 +83,7 @@ def actualizar_responsable_centro(id_centro: int, nuevo_responsable: str):
 def obtener_vacunas():
     return supabase.table("vacunas").select("*").execute()
 
-# def transformar_vacunas_dataframe():
-#     vacunas_response = supabase.table("vacunas").select("*").execute()
-#     vacunas = vacunas_response.data
 
-#     df = pd.DataFrame(vacunas)
-#     df["grupo"] = df.apply(lambda row: "embarazada" if row["frecuencia_refuerzo"] == 12 and row["edad_1ra_dosis"] < 12
-#                            else ("personal_salud" if row["frecuencia_refuerzo"] == 12 and row["edad_1ra_dosis"] > 600 else None), axis=1)
-#     df = df.rename(columns={
-#         "nombre_vacuna": "vacuna",
-#         "edad_1ra_dosis": "edad_1ra",
-#         "refuerzo": "refuerzo",
-#         "obligatoria": "obligatoria"
-#     })
-
-#     return df
-## ARRIBA VERIOSN VIEJA
 
 def transformar_vacunas_dataframe():
     resultado = obtener_vacunas()
@@ -112,7 +97,7 @@ def transformar_vacunas_dataframe():
     columnas_esperadas = [
         'id_vacuna', 'nombre_vacuna', 'laboratorio', 'enfermedad_que_previene',
         'edad_1ra_dosis', 'edad_2da_dosis', 'edad_3ra_dosis',
-        'refuerzo', 'frecuencia_refuerzo', 'obligatoria'
+        'refuerzo', 'frecuencia_refuerzo', 'obligatoria', 'embarazada', 'personalsalud'
     ]
     for col in columnas_esperadas:
         if col not in df.columns:
@@ -190,4 +175,3 @@ def obtener_aplicaciones_anuales(anio, id_centro):
         vacunas(nombre_vacuna, laboratorio)
     """).gte("fecha_aplicacion", fecha_inicio).lte("fecha_aplicacion", fecha_fin).eq("id_centro", id_centro).execute()
 
-###tengo que agregar vacunas de forma manual en BD
