@@ -1,42 +1,6 @@
 import streamlit as st
 import pandas as pd
 from funciones_supabase import obtener_historial_vacunacion_usuario
-#from supabase_usuario import obtener_historial_vacunacion_usuario
-
-# Simulación de función hasta conectar con Supabase
-# def obtener_historial_vacunacion_usuario(dni):
-#     # Datos ficticios para pruebas
-#     return [
-#         {
-#             "Vacuna": "Sputnik V",
-#             "Laboratorio": "Gamaleya",
-#             "Enfermedad": "COVID-19",
-#             "Fecha": "2021-03-15",
-#             "Dosis": "Primera dosis"
-#         },
-#         {
-#             "Vacuna": "Sputnik V",
-#             "Laboratorio": "Gamaleya",
-#             "Enfermedad": "COVID-19",
-#             "Fecha": "2021-04-15",
-#             "Dosis": "Segunda dosis"
-#         },
-#         {
-#             "Vacuna": "Triple Viral",
-#             "Laboratorio": "Sinergium",
-#             "Enfermedad": "Sarampión",
-#             "Fecha": "2010-05-10",
-#             "Dosis": "Única dosis"
-#         },
-#         {
-#             "Vacuna": "Antigripal",
-#             "Laboratorio": "Sanofi",
-#             "Enfermedad": "Influenza",
-#             "Fecha": "2023-06-20",
-#             "Dosis": "Anual"
-#         }
-#     ]
-
 
 def mostrar_historial_usuario():
     st.header("📋 Historial de vacunación")
