@@ -33,7 +33,7 @@ def mostrar_vista_usuario():
 
     if opcion == "Inicio":
         st.header(f"👋 ¡Bienvenida, {st.session_state.nombre_usuario}!")
-        st.markdown("Te damos la bienvenida a tu panel personal de Inmutrack. Desde aquí podrás:")
+        st.markdown("Te damos la bienvenida a tu panel personal de Inmutrack.")
 ##ver que aca dice desde aqui podras y despues no dice nada mas
         # Obtener datos reales
         dni = st.session_state.get("dni", "")
@@ -71,6 +71,7 @@ def mostrar_vista_usuario():
             
             # Inicializo listas
             pendientes_inicio = []
+            pendientes_inicio1 = [] ##cree esto para probar que pasa si no hubiera pendientes
             proximas = []
             
             for _, row in vacunas_df.iterrows():
@@ -90,15 +91,7 @@ def mostrar_vista_usuario():
             
             col1, col2 = st.columns(2)
             with col1:
-                st.subheader("💉 Próxima vacuna")
-                if proximas:
-                    vacuna_proxima = sorted(proximas, key=lambda x: x[1])[0]
-                    meses_faltan = vacuna_proxima[1] - edad_actual_meses
-                    fecha_aprox = datetime.today().date() + pd.DateOffset(months=meses_faltan)
-                    st.info(f"{vacuna_proxima[0]} - {fecha_aprox.strftime('%d/%m/%Y')}")
-                else:
-                    st.success("No hay vacunas próximas registradas")
-            
+                st.subheader("💉 Vacunas pendientes")
                 if pendientes_inicio:
                     st.warning(f"🔔 Tenés {len(set(pendientes_inicio))} vacunas pendientes por aplicar")
                 else:
@@ -109,7 +102,7 @@ def mostrar_vista_usuario():
 
 
     elif opcion == "Mis datos":
-        st.header("📇 Mis datos personales")
+        st.header("🪪 Mis datos personales")
 
         usuario = st.session_state.get("usuario_actual", {})
         st.session_state["dni"] = usuario.get("user_id", "")
