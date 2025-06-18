@@ -46,7 +46,10 @@ def mostrar_vista_usuario():
         edad_actual_meses = (datetime.today() - datetime.strptime(fecha_nacimiento, "%Y-%m-%d")).days // 30
 
         resultado = obtener_historial_vacunacion_usuario(int(dni))
-        historial = resultado.data if resultado and resultado.data else []
+        if resultado and hasattr(resultado, "data") and resultado.data:
+            historial = resultado.data
+        else:
+            historial = []
 
         cantidad_dosis = len(historial)
 
