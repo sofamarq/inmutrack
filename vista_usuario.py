@@ -34,71 +34,61 @@ def mostrar_vista_usuario():
     if opcion == "Inicio":
         st.header(f"👋 ¡Bienvenida, {st.session_state.nombre_usuario}!")
         st.markdown("Te damos la bienvenida a tu panel personal de Inmutrack.")
-##ver que aca dice desde aqui podras y despues no dice nada mas
-        # Obtener datos reales
+    
         dni = st.session_state.get("dni", "")
-        historial_response = obtener_historial_vacunacion_usuario(int(dni))
+        usuario = st.session_state.get("usuario_actual", {})
+    
+        # Edad actual en meses
+        fecha_nacimiento = usuario.get("fecha_nacimiento", "")
+        if not fecha_nacimiento:
+            st.warning("No se encontró la fecha de nacimiento.")
+            return
+        edad_actual_meses = (datetime.today() - datetime.strptime(fecha_nacimiento, "%Y-%m-%d")).days // 30
+    
+        # Historial de vacunas aplicadas
+        resultado = obtener_historial_vacunacion_usuario(int(dni))
+        if not resultado or resultado.data is None:
+            historial = []
+        else:
+            historial = resultado.data
+    
+        cantidad_dosis = len(historial)
+    
         vacunas_df = transformar_vacunas_dataframe()
+        vacunas_df = vacunas_df.drop_duplicates(subset=["nombre_vacuna"])
+    
+        aplicadas = {r["vacunas"]["nombre_vacuna"] for r in historial if r.get("vacunas")}
+    
+        pendientes = []
         proximas = []
-
-        if historial_response:
-            historial = historial_response.data
-            cantidad_dosis = len(historial)
-
-        # Obtener edad actual del usuario en meses
-            usuario = st.session_state.get("usuario_actual", {})
-            fecha_nac = usuario.get("fecha_nacimiento", "")
-            edad_actual_meses = (datetime.today().date() - datetime.strptime(fecha_nac, "%Y-%m-%d").date()).days // 30
-
-            # Obtener datos del usuario actual
-            usuario = st.session_state.get("usuario_actual", {})
-            dni = usuario.get("user_id")
-            fecha_nacimiento = usuario.get("fecha_nacimiento")
-
-            # Edad actual en meses
-            edad_actual_meses = (datetime.today() - datetime.strptime(fecha_nacimiento, "%Y-%m-%d")).days // 30
-
-            # Obtener historial y vacunas
-            historial = obtener_historial_vacunacion_usuario(dni)
-            vacunas_df = transformar_vacunas_dataframe()
-            vacunas_df = vacunas_df.drop_duplicates(subset=["nombre_vacuna"])
-            
-            if isinstance(historial, dict) and "data" in historial:
-                historial = historial["data"]
-            
-            # Set de vacunas ya aplicadas
-            aplicadas = {r["vacuna"] for r in historial if "vacuna" in r}
-            
-            # Inicializo listas
-            pendientes_inicio = []
-            pendientes_inicio1 = [] ##cree esto para probar que pasa si no hubiera pendientes
-            proximas = []
-            
-            for _, row in vacunas_df.iterrows():
-                if row["edad_1ra_dosis"] is None:
-                    continue
-            
-                if row["edad_1ra_dosis"] <= edad_actual_meses and row["nombre_vacuna"] not in aplicadas:
-                    pendientes_inicio.append(row["nombre_vacuna"])
-                elif row["nombre_vacuna"] not in aplicadas:
-                    # Calculamos próximas dosis futuras
-                    if row["edad_1ra_dosis"] > edad_actual_meses:
-                        proximas.append((row["nombre_vacuna"], row["edad_1ra_dosis"]))
-                    elif row["refuerzo"] is not None and (row["edad_1ra_dosis"] + row["refuerzo"]) > edad_actual_meses:
-                        proximas.append((row["nombre_vacuna"], row["edad_1ra_dosis"] + row["refuerzo"]))
-            
-            # Visualización
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.subheader("💉 Vacunas pendientes")
-                if pendientes_inicio:
-                    st.warning(f"🔔 Tenés {len(set(pendientes_inicio))} vacunas pendientes por aplicar")
-                else:
-                    st.success("✔️ No tenés vacunas pendientes.")
-            with col2:
-                st.subheader("📋 Dosis aplicadas")
-                st.success(f"{cantidad_dosis} dosis registradas")
+    
+        for _, row in vacunas_df.iterrows():
+            if row["edad_1ra_dosis"] is None:
+                continue
+    
+            nombre = row["nombre_vacuna"]
+            edad_1ra = row["edad_1ra_dosis"]
+            refuerzo = row["refuerzo"]
+    
+            if edad_1ra <= edad_actual_meses and nombre not in aplicadas:
+                pendientes.append(nombre)
+            elif nombre not in aplicadas:
+                if edad_1ra > edad_actual_meses:
+                    proximas.append(nombre)
+                elif refuerzo and (edad_1ra + refuerzo) > edad_actual_meses:
+                    proximas.append(nombre)
+    
+        # Visualización
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("💉 Vacunas pendientes")
+            if pendientes:
+                st.warning(f"🔔 Tenés {len(set(pendientes))} vacunas pendientes por aplicar")
+            else:
+                st.success("✔️ No tenés vacunas pendientes.")
+        with col2:
+            st.subheader("📋 Dosis aplicadas")
+            st.success(f"{cantidad_dosis} dosis registradas")
 
 
     elif opcion == "Mis datos":
