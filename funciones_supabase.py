@@ -123,16 +123,28 @@ def registrar_aplicacion(data:dict):
 #def obtener_aplicaciones_por_dni(dni):
     #return supabase.table("aplicaciones").select("*").eq("dni", dni).execute()
 
-def obtener_historial_vacunacion_usuario(dni: int): #agregar dosis entre fecha y vacuna
-    return supabase.table("registro").select("""
-        fecha_aplicacion,
-        
-        vacunas(
-            nombre_vacuna,
-            laboratorio,
-            enfermedad_que_previene
-        )
-    """).eq("id_usuario", dni).order("fecha_aplicacion").execute()
+def obtener_historial_vacunacion_usuario(dni: int):
+    # Obtener aplicaciones
+    aplicaciones = supabase.table("registro").select("*").eq("id_usuario", dni).execute()
+    if not aplicaciones.data:
+        return []
+
+    # Obtener info de vacunas para hacer el merge manual
+    vacunas_info = supabase.table("vacunas").select("*").execute()
+    mapa_vacunas = {v["id_vacuna"]: v for v in vacunas_info.data}
+
+    # Enriquecer registros con info de vacunas
+    historial = []
+    for r in aplicaciones.data:
+        vacuna = mapa_vacunas.get(r["id_vacuna"], {})
+        historial.append({
+            "vacuna": vacuna.get("nombre_vacuna", "Desconocida"),
+            "laboratorio": vacuna.get("laboratorio", ""),
+            "enfermedad": vacuna.get("enfermedad_que_previene", ""),
+            "fecha": r["fecha_aplicacion"]
+        })
+
+    return historial
 
 def obtener_aplicaciones_por_fecha(fecha: str, id_centro: int):
     #return supabase.table("aplicaciones").select("*").eq("fecha", fecha).execute()
